@@ -2,6 +2,8 @@
 /dist
 /node_modules
 
+# Custome ignores
+next_price_database
 # Logs
 logs
 *.log
