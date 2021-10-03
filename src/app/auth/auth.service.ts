@@ -33,14 +33,15 @@ export class AuthService {
         'Email is not yet verified please check your mail to verify',
         HttpStatus.UNAUTHORIZED,
       );
-    return this.jwtService.sign(
+    const accessToken = this.jwtService.sign(
       {
         _id: user.id,
         active: user.isActive,
-        role: user.role,
+        role: user.role as unknown as Role,
       },
       { expiresIn: '10m' },
     );
+    return { accessToken };
   }
 
   // @Transaction({ isolation: 'SERIALIZABLE' })
@@ -87,4 +88,8 @@ export class AuthService {
       throw new Error(error.message);
     }
   }
+
+  // async getCurrentUser(userId: number) {
+
+  // }
 }

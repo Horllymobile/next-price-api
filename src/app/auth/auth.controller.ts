@@ -8,9 +8,13 @@ import {
   Post,
   UsePipes,
   HttpException,
+  Res,
+  Req,
+  HttpStatus,
 } from '@nestjs/common';
 import * as Joi from 'joi';
 import { UserDto } from '../user/dto/user.dto';
+import { Request, Response } from 'express';
 
 const userSchema = Joi.object({
   firstName: Joi.string().required(),
@@ -24,12 +28,18 @@ export class AuthController {
   constructor(private authService: AuthService) {}
   @Post('/register')
   @UsePipes(new ValidationPipe(userSchema))
-  async register(@Body() userDto: RegisterDto): Promise<UserDto> {
-    return this.authService.register(userDto);
+  async register(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Body() userDto: RegisterDto,
+  ): Promise<Response<any, Record<string, any>>> {
+    return response
+      .status(HttpStatus.CREATED)
+      .json(this.authService.register(userDto));
   }
 
   @Post('/login')
-  async login(@Body() payload: LoginDto): Promise<string> {
+  async login(@Body() payload: LoginDto): Promise<any> {
     return this.authService.login(payload);
   }
 }
