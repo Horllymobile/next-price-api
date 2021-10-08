@@ -27,7 +27,7 @@ export class UserService implements IUserService {
         'isActive',
         'phoneNumber',
         'createdAt',
-        'role',
+        'roles',
       ],
       skip: page,
       take: size,
@@ -43,7 +43,11 @@ export class UserService implements IUserService {
 
   async findUserById(userId: number): Promise<UserDto> {
     const user = await this.userRepository.findOne(userId);
-    if (!user) throw new Error(`user with id of ${userId} does not exist`);
+    if (!user)
+      throw new HttpException(
+        `user with id of ${userId} does not exist`,
+        HttpStatus.NOT_FOUND,
+      );
     return user;
   }
   async findByEmail(email: string) {

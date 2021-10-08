@@ -1,10 +1,9 @@
+import { JwtModule } from '@nestjs/jwt';
+import { Module } from '@nestjs/common';
 import { RoleEntity } from './user/entity/role.entity';
 import { UserEntity } from './user/entity/user.entity';
 import { AuthModule } from './auth/auth.module';
-import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { join } from 'path';
-
 import { UserModule } from './user/user.module';
 
 @Module({
