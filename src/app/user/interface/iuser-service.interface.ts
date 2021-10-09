@@ -7,6 +7,7 @@ export interface IUserService {
     size: number,
   ): Promise<UserPaginationDto | HttpException>;
   findUserById(userId: number): Promise<UserDto>;
-  updateUser(userId: number, user: UserDto): Promise<UserDto>;
-  deleteUser(userId: number): Promise<UserDto>;
+  updateUser(userId: number, user: UserDto): Promise<any>;
+  // uploadProfileImage(userId: number, image: any): Promise<any>;
+  deleteUser(userId: number): Promise<any>;
 }

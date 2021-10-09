@@ -21,7 +21,10 @@ export class AuthService {
   ) {}
 
   async login(payload: LoginDto) {
-    const user = await this.userService.findByEmail(payload.email);
+    const user = await this.userRepository.findOne({ email: payload.email });
+    if (!user) {
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    }
     const isValid = await bcrypt.compare(payload.password, user.password);
     if (!isValid)
       throw new HttpException(
@@ -61,11 +64,9 @@ export class AuthService {
   // @Transaction({ isolation: 'SERIALIZABLE' })
   async register(user: RegisterDto) {
     const queryRunner = this.connection.createQueryRunner(); //
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction('SERIALIZABLE');
-
     try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction('SERIALIZABLE');
       const findUser = await this.userRepository.find({
         where: { email: user.email },
       });

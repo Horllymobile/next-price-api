@@ -1,3 +1,4 @@
+import { ImageEntity } from './entity/image.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthMiddleware } from './../auth/middleware/auth.middleware';
 import { RoleEntity } from './entity/role.entity';
