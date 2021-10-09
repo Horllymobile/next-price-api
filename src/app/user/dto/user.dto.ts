@@ -9,7 +9,7 @@ export class UserDto {
   password: string;
   phoneNumber?: string;
   isActive: boolean;
-  role?: RoleEntity;
+  roles?: RoleEntity;
   //   permission: Permission;
 }
 

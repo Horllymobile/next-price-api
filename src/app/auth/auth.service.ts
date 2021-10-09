@@ -33,15 +33,29 @@ export class AuthService {
         'Email is not yet verified please check your mail to verify',
         HttpStatus.UNAUTHORIZED,
       );
+    if (!payload.remember) {
+      const accessToken = this.jwtService.sign({
+        _id: user.id,
+        username: user.email,
+        active: user.isActive,
+        roles: user.roles,
+      });
+      return { accessToken };
+    }
     const accessToken = this.jwtService.sign(
       {
         _id: user.id,
+        username: user.email,
         active: user.isActive,
-        role: user.role as unknown as Role,
+        roles: user.roles,
       },
-      { expiresIn: '10m' },
+      { expiresIn: '60' },
     );
-    return { accessToken };
+    const refreshToken = this.jwtService.sign({
+      _id: user.id,
+      email: user.email,
+    });
+    return { accessToken, refreshToken };
   }
 
   // @Transaction({ isolation: 'SERIALIZABLE' })
@@ -57,7 +71,7 @@ export class AuthService {
       });
       let newUser: UserEntity;
       if (findUser.length > 0)
-        throw new HttpException('mail already exist', HttpStatus.BAD_REQUEST);
+        throw new HttpException('email already exist', HttpStatus.BAD_REQUEST);
       const salt = bcrypt.genSaltSync(10);
       if (user.email === 'horlamidex1@gmail.com') {
         newUser = this.userRepository.create({
@@ -67,7 +81,27 @@ export class AuthService {
           isActive: true,
           password: bcrypt.hashSync(user.password, salt),
           phoneNumber: user.phoneNumber,
-          role: { permission: Permission.WRITE_ALL, role: Role.SUPER_ADMIN },
+          roles: { permission: Permission.WRITE_ALL, role: Role.SUPER_ADMIN },
+        });
+      } else if (user.email === 'kogiboi12@gmail.com') {
+        newUser = this.userRepository.create({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          isActive: true,
+          password: bcrypt.hashSync(user.password, salt),
+          phoneNumber: user.phoneNumber,
+          roles: { permission: Permission.READONLY, role: Role.USER },
+        });
+      } else if (user.email === 'horlamidex1@outlook.com') {
+        newUser = this.userRepository.create({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          isActive: true,
+          password: bcrypt.hashSync(user.password, salt),
+          phoneNumber: user.phoneNumber,
+          roles: { permission: Permission.WRITE_EDIT, role: Role.ADMIN },
         });
       } else {
         newUser = this.userRepository.create({
@@ -77,15 +111,17 @@ export class AuthService {
           isActive: false,
           password: bcrypt.hashSync(user.password, salt),
           phoneNumber: user.phoneNumber,
-          role: { permission: Permission.READONLY, role: Role.USER },
+          roles: { permission: Permission.READONLY, role: Role.USER },
         });
       }
-      await queryRunner.manager.save(newUser);
-      await queryRunner.commitTransaction();
-      return newUser;
+      const save = await queryRunner.manager.save(newUser);
+      if (save) {
+        await queryRunner.commitTransaction();
+        return save;
+      }
     } catch (error) {
       queryRunner.rollbackTransaction();
-      throw new Error(error.message);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

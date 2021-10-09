@@ -45,5 +45,5 @@ export class UserEntity {
     onDelete: 'CASCADE',
   }) // entity relationships between user and role entity
   @JoinColumn()
-  role: RoleEntity;
+  roles: RoleEntity;
 }

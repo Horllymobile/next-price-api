@@ -1,5 +1,5 @@
 export enum Permission {
-  READONLY,
-  WRITE_EDIT,
-  WRITE_ALL,
+  READONLY = 'read',
+  WRITE_EDIT = 'edit',
+  WRITE_ALL = 'write',
 }

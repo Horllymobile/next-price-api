@@ -3,7 +3,7 @@
 /node_modules
 
 # Custome ignores
-next_price_database
+next_price_database.sql
 # Logs
 logs
 *.log

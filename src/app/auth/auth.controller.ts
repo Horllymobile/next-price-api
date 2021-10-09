@@ -1,3 +1,4 @@
+import { UserEntity } from './../user/entity/user.entity';
 import { LoginDto } from './dto/LoginDto';
 import { ValidationPipe } from './../../core/shared/pipes/validation.pipe.pipe';
 import { AuthService } from './auth.service';
@@ -23,7 +24,7 @@ const userSchema = Joi.object({
   phoneNumber: Joi.string().required().min(11).max(14),
   password: Joi.string().required().min(6).max(16),
 });
-@Controller(`auth`)
+@Controller(`api/auth`)
 export class AuthController {
   constructor(private authService: AuthService) {}
   @Post('/register')
@@ -32,10 +33,9 @@ export class AuthController {
     @Req() request: Request,
     @Res() response: Response,
     @Body() userDto: RegisterDto,
-  ): Promise<Response<any, Record<string, any>>> {
-    return response
-      .status(HttpStatus.CREATED)
-      .json(this.authService.register(userDto));
+  ): Promise<Response<UserEntity, any>> {
+    response.status(HttpStatus.CREATED);
+    return response.json(this.authService.register(userDto));
   }
 
   @Post('/login')
