@@ -1,3 +1,4 @@
+import { ImageEntity } from './../user/entity/image.entity';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { UserService } from './../user/user.service';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';

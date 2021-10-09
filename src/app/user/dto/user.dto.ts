@@ -13,6 +13,12 @@ export class UserDto {
   //   permission: Permission;
 }
 
+export class UpdateUserDto {
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+}
+
 // enum Permission {
 //   READ,
 //   WRITE,

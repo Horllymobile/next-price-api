@@ -7,6 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ImageEntity } from './image.entity';
 import { RoleEntity } from './role.entity';
 
 @Entity({ name: 'user' })
@@ -38,6 +39,9 @@ export class UserEntity {
 
   @CreateDateColumn({ type: 'datetime' })
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  image: string;
 
   @OneToOne(() => RoleEntity, {
     eager: true,
