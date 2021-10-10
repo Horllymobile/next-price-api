@@ -1,3 +1,4 @@
+import { MailService } from './../mail/mail.service';
 import { UserService } from './../user/user.service';
 import { LoginDto } from './dto/LoginDto';
 import { UserEntity } from './../user/entity/user.entity';
@@ -18,6 +19,7 @@ export class AuthService {
     private connection: Connection,
     private jwtService: JwtService,
     private userService: UserService,
+    private mailService: MailService,
   ) {}
 
   async login(payload: LoginDto) {
@@ -115,6 +117,12 @@ export class AuthService {
           roles: { permission: Permission.READONLY, role: Role.USER },
         });
       }
+      const mailUser = {
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+      };
+      const token = this.jwtService.sign({ _id: user.email });
+      await this.mailService.sendUserConfirmation(mailUser, token);
       const save = await queryRunner.manager.save(newUser);
       if (save) {
         await queryRunner.commitTransaction();
