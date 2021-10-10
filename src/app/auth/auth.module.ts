@@ -1,4 +1,4 @@
-import { ImageEntity } from './../user/entity/image.entity';
+import { MailModule } from './../mail/mail.module';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { UserService } from './../user/user.service';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
@@ -10,8 +10,6 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtContant } from './constants/jwtConstant';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from './guard/role.guard';
 @Module({
   imports: [
     JwtModule.register({
@@ -21,6 +19,7 @@ import { RolesGuard } from './guard/role.guard';
       },
     }),
     TypeOrmModule.forFeature([UserEntity, RoleEntity]),
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -32,6 +31,7 @@ import { RolesGuard } from './guard/role.guard';
     //   useClass: RolesGuard,
     // },
   ],
+  exports: [AuthService],
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
