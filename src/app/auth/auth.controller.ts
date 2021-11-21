@@ -32,10 +32,8 @@ export class AuthController {
     @Req() request: Request,
     @Res() response: Response,
     @Body() userDto: RegisterDto,
-  ): Promise<Response<any, Record<string, any>>> {
-    return response
-      .status(HttpStatus.CREATED)
-      .json(this.authService.register(userDto));
+  ): Promise<any> {
+    return this.authService.register(userDto);
   }
 
   @Post('/login')

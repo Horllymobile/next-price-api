@@ -1,5 +1,5 @@
 import { RoleEntity } from '../entity/role.entity';
-import { Role } from './../enums/Role';
+import { Role } from '../../../core/models/enums/Role';
 
 export class UserDto {
   id?: number;

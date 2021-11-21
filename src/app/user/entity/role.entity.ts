@@ -1,8 +1,7 @@
 import { UserEntity } from './user.entity';
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Role } from '../enums/Role';
-import { Permission } from '../enums/Permission';
-import { on } from 'events';
+import { Role } from '../../../core/models/enums/Role';
+import { Permission } from '../../../core/models/enums/Permission';
 
 @Entity({ name: 'role' })
 export class RoleEntity {
