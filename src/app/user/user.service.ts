@@ -1,8 +1,15 @@
+import { ImageEntity } from './entity/image.entity';
 import { UserPaginationDto } from './dto/user.pagination.dto';
-import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  HttpStatus,
+  HttpCode,
+  Req,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserDto } from './dto/user.dto';
+import { Repository, Connection } from 'typeorm';
+import { UserDto, UpdateUserDto } from './dto/user.dto';
 import { UserEntity } from './entity/user.entity';
 import { IUserService } from './interface/iuser-service.interface';
 
@@ -11,6 +18,7 @@ export class UserService implements IUserService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    private connection: Connection,
   ) {}
 
   async findUsers(
@@ -27,7 +35,9 @@ export class UserService implements IUserService {
         'isActive',
         'phoneNumber',
         'createdAt',
-        'role',
+        'updatedAt',
+        'image',
+        'roles',
       ],
       skip: page,
       take: size,
@@ -42,23 +52,115 @@ export class UserService implements IUserService {
   }
 
   async findUserById(userId: number): Promise<UserDto> {
-    const user = await this.userRepository.findOne(userId);
-    if (!user) throw new Error(`user with id of ${userId} does not exist`);
-    return user;
+    try {
+      const user = await this.userRepository.findOne(userId, {
+        select: [
+          'id',
+          'firstName',
+          'lastName',
+          'email',
+          'isActive',
+          'phoneNumber',
+          'createdAt',
+          'roles',
+        ],
+      });
+      // if (!user)
+      //   throw new HttpException(
+      //     `user with id of ${userId} does not exist`,
+      //     HttpStatus.NOT_FOUND,
+      //   );
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        'User not found',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
   async findByEmail(email: string) {
-    const user = await this.userRepository.findOne({ email });
-    if (!user)
-      throw new HttpException(
-        `email ${email} does not exist`,
-        HttpStatus.NOT_FOUND,
+    try {
+      const user = await this.userRepository.findOne(
+        { email },
+        {
+          select: [
+            'id',
+            'firstName',
+            'lastName',
+            'email',
+            'isActive',
+            'phoneNumber',
+            'createdAt',
+            'roles',
+          ],
+        },
       );
-    return user;
+      if (!user)
+        throw new HttpException(
+          `email ${email} does not exist`,
+          HttpStatus.NOT_FOUND,
+        );
+      return user;
+    } catch (error) {
+      throw new HttpException(`Something went wrong`, HttpStatus.NOT_FOUND);
+    }
   }
-  updateUser(userId: number, user: UserDto): Promise<UserDto> {
-    throw new Error('Method not implemented.');
+
+  async uploadProfileImage(userId: number, image: string): Promise<any> {
+    const user = await this.userRepository.findOne(userId);
+    console.log(image);
+    if (!user) {
+      throw new HttpException('user does not exist', HttpStatus.NOT_FOUND);
+    }
+    user.image = image;
+    await this.userRepository.save(user);
+    return { message: 'image successfully uploaded' };
   }
-  deleteUser(userId: number): Promise<UserDto> {
-    throw new Error('Method not implemented.');
+  async updateUser(userId: number, payload: UpdateUserDto): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction('SERIALIZABLE');
+      let user = await this.userRepository.findOne(userId);
+      if (!user) {
+        throw new HttpException(
+          `user with id ${userId} not found`,
+          HttpStatus.NOT_FOUND,
+        );
+      } else {
+        user = await this.findByEmail(user.email);
+        if (user && user.id !== userId) {
+          await queryRunner.rollbackTransaction();
+          throw new HttpException(
+            `user with email already exist`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        user = await this.userRepository.findOne({
+          phoneNumber: payload.phoneNumber,
+        });
+        if (user && user.id !== userId) {
+          await queryRunner.rollbackTransaction();
+          throw new HttpException(
+            `phone number already taken`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        await queryRunner.commitTransaction();
+        await this.userRepository.update(userId, {
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          phoneNumber: payload.phoneNumber,
+        });
+        return { message: 'User update successfully' };
+      }
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async deleteUser(userId: number): Promise<any> {
+    const user = await this.userRepository.findOne(userId);
+    if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+    return await this.userRepository.delete(userId);
   }
 }
