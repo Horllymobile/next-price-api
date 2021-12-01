@@ -6,11 +6,16 @@ import { UserEntity } from './user/entity/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
+import { MailModule } from './mail/mail.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'next_price_database',
@@ -25,6 +30,7 @@ import { UserModule } from './user/user.module';
       // migrationsRun: true,
       // migrations: [join(__dirname + './migrations/*.js')],
     }),
+    MailModule,
   ],
   controllers: [],
   providers: [],

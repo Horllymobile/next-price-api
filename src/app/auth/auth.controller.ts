@@ -12,10 +12,12 @@ import {
   Res,
   Req,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import * as Joi from 'joi';
 import { UserDto } from '../user/dto/user.dto';
 import { Request, Response } from 'express';
+import { retry } from 'rxjs';
 
 const userSchema = Joi.object({
   firstName: Joi.string().required(),
@@ -24,7 +26,7 @@ const userSchema = Joi.object({
   phoneNumber: Joi.string().required().min(11).max(14),
   password: Joi.string().required().min(6).max(16),
 });
-@Controller(`api/auth`)
+@Controller(`api/v1/auth`)
 export class AuthController {
   constructor(private authService: AuthService) {}
   @Post('/register')
@@ -33,13 +35,26 @@ export class AuthController {
     @Req() request: Request,
     @Res() response: Response,
     @Body() userDto: RegisterDto,
-  ): Promise<Response<UserEntity, any>> {
-    response.status(HttpStatus.CREATED);
-    return response.json(this.authService.register(userDto));
+  ): Promise<any> {
+    this.authService
+      .register(userDto)
+      .then((res) =>
+        response.status(HttpStatus.CREATED).json({ metaData: { ...res } }),
+      )
+      .catch((error) =>
+        response
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ metaData: { error: error.message } }),
+      );
   }
 
   @Post('/login')
   async login(@Body() payload: LoginDto): Promise<any> {
     return this.authService.login(payload);
+  }
+
+  @Post('/confirm')
+  async confirm(@Query('token') token: string) {
+    return this.authService.confirm(token);
   }
 }

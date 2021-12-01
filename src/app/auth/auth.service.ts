@@ -1,8 +1,9 @@
+import { MailService } from './../mail/mail.service';
 import { UserService } from './../user/user.service';
 import { LoginDto } from './dto/LoginDto';
 import { UserEntity } from './../user/entity/user.entity';
 import { RegisterDto } from './dto/RegisterDto';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -18,6 +19,7 @@ export class AuthService {
     private connection: Connection,
     private jwtService: JwtService,
     private userService: UserService,
+    private mailService: MailService,
   ) {}
 
   async login(payload: LoginDto) {
@@ -115,10 +117,30 @@ export class AuthService {
           roles: { permission: Permission.READONLY, role: Role.USER },
         });
       }
+      // const mailUser = {
+      //   email: user.email,
+      //   name: `${user.firstName} ${user.lastName}`,
+      // };
+      // const token = this.jwtService.sign(
+      //   { _id: user.email },
+      //   { expiresIn: '1 day' },
+      // );
+      // await this.mailService.sendUserConfirmation(mailUser, token);
       const save = await queryRunner.manager.save(newUser);
       if (save) {
         await queryRunner.commitTransaction();
-        return save;
+        return {
+          id: save.id,
+          image: save.image,
+          firstName: save.firstName,
+          lastName: save.lastName,
+          email: save.email,
+          isActive: save.isActive,
+          phoneNumber: save.phoneNumber,
+          role: save.roles,
+          createdAt: save.createdAt,
+          updatedAt: save.updatedAt,
+        };
       }
     } catch (error) {
       queryRunner.rollbackTransaction();
@@ -126,7 +148,20 @@ export class AuthService {
     }
   }
 
-  // async getCurrentUser(userId: number) {
+  async confirm(token: string) {
+    const isValid = this.jwtService.verify(token);
+    if (!isValid) {
+      throw new HttpException('Invalid token provided', HttpStatus.BAD_REQUEST);
+    }
+    console.log(isValid);
+    const user = await this.userRepository.findOne({ email: isValid.username });
 
-  // }
+    if (!user) {
+      throw new HttpException('Account does not exist', HttpStatus.BAD_REQUEST);
+    }
+    // const decode = this.jwtService.decode(token);
+    user.isActive = true;
+    await this.userRepository.save(user, { transaction: true });
+    return { message: 'Account validation succesfull' };
+  }
 }
