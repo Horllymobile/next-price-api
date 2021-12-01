@@ -26,11 +26,7 @@ const userSchema = Joi.object({
   phoneNumber: Joi.string().required().min(11).max(14),
   password: Joi.string().required().min(6).max(16),
 });
-<<<<<<< HEAD
 @Controller(`api/v1/auth`)
-=======
-@Controller(`v1/auth`)
->>>>>>> 6bca85d816adb8d48c53605256a38464953a9bf1
 export class AuthController {
   constructor(private authService: AuthService) {}
   @Post('/register')
@@ -42,7 +38,6 @@ export class AuthController {
   ): Promise<any> {
     this.authService
       .register(userDto)
-<<<<<<< HEAD
       .then((res) =>
         response.status(HttpStatus.CREATED).json({ metaData: { ...res } }),
       )
@@ -51,18 +46,6 @@ export class AuthController {
           .status(HttpStatus.BAD_REQUEST)
           .json({ metaData: { error: error.message } }),
       );
-=======
-      .then((res) => {
-        return response
-          .status(HttpStatus.CREATED)
-          .json({ metaData: { ...res } });
-      })
-      .catch((err) => {
-        return response
-          .status(HttpStatus.BAD_REQUEST)
-          .json({ error: err.message });
-      });
->>>>>>> 6bca85d816adb8d48c53605256a38464953a9bf1
   }
 
   @Post('/login')
