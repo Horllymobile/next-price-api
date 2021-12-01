@@ -29,7 +29,7 @@ const userSchema = Joi.object({
   lastName: Joi.string().required(),
   phoneNumber: Joi.string().required().min(11).max(14),
 });
-@Controller('api/users')
+@Controller('api/v1/users')
 @UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private userService: UserService) {}
