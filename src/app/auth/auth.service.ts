@@ -7,8 +7,8 @@ import { Injectable, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Permission } from '../user/enums/Permission';
-import { Role } from '../user/enums/Role';
+import { Permission } from '../../core/models/enums/Permission';
+import { Role } from '../../core/models/enums/Role';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -129,7 +129,18 @@ export class AuthService {
       const save = await queryRunner.manager.save(newUser);
       if (save) {
         await queryRunner.commitTransaction();
-        return save;
+        return {
+          id: save.id,
+          image: save.image,
+          firstName: save.firstName,
+          lastName: save.lastName,
+          email: save.email,
+          isActive: save.isActive,
+          phoneNumber: save.phoneNumber,
+          role: save.roles,
+          createdAt: save.createdAt,
+          updatedAt: save.updatedAt,
+        };
       }
     } catch (error) {
       queryRunner.rollbackTransaction();
