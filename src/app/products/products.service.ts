@@ -5,7 +5,7 @@ import { ProductDTO } from './dto/product';
 import { IProduct } from './interface/IProduct';
 import { ProductPagination } from './interface/IProduct.response';
 import { InjectRepository } from '@nestjs/typeorm';
-
+import { UpdateProductDTO } from './dto/update_product_dto';
 @Injectable()
 export class ProductsService implements IProduct {
   constructor(
@@ -17,41 +17,64 @@ export class ProductsService implements IProduct {
   async getProducts(
     page: number,
     size: number,
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     search?: string,
   ): Promise<any> {
-    const total = await (await this.productRepository.find()).length;
-    // this.connection.getRepository(ProductEntity)
-    // .createQueryBuilder('product')
-    // .where('')
-    let products: ProductEntity[];
+    try {
+      const total = await this.productRepository.findAndCount();
+      // this.connection.getRepository(ProductEntity)
+      // .createQueryBuilder('product')
+      // .where('')
+      let products: ProductEntity[];
+      if (startDate && endDate) {
+        // console.log(dates);
+        products = await this.productRepository.query(
+          'SELECT * FROM product WHERE createAt BETWEEN :startDate and :endDate;',
+          [startDate, endDate],
+        );
 
-    if (startDate && endDate) {
-      products = await this.productRepository.find({
-        skip: page,
-        take: size,
-        where: `createAt BETWEEN :${startDate} AND :${endDate}`,
-      });
-    } else {
-      products = await this.productRepository.find({
-        skip: page,
-        take: size,
-      });
+        // console.log(products);
+      } else {
+        products = await this.productRepository.find({
+          skip: page,
+          take: size,
+        });
+      }
+      const data: ProductPagination = {
+        page: page ?? 0,
+        size: size ?? 20,
+        total: total.length,
+        metaData: [...products],
+      };
+
+      return data;
+    } catch (error) {
+      throw new HttpException(
+        { error: error.message },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    const data: ProductPagination = {
-      page: page ?? 0,
-      size: size ?? 20,
-      total,
-      metaData: [...products],
-    };
-
-    return data;
   }
-  getProduct(productId: number): Promise<any> {
-    throw new Error('Method not implemented.');
+  async getProduct(id: number): Promise<any> {
+    try {
+      const product = await this.productRepository.findOne(id);
+      if (!product) {
+        throw new HttpException(
+          { error: 'Product with not found' },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      console.log(product);
+      return product;
+    } catch (error) {
+      throw new HttpException(
+        { error: error.message },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
+
   async addProduct(product: ProductDTO): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
     try {
@@ -92,5 +115,37 @@ export class ProductsService implements IProduct {
       queryRunner.rollbackTransaction();
       throw new HttpException({ error: error.message }, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async updateProduct(productId: number, product: UpdateProductDTO) {
+    const prod = await this.productRepository.findOne({ id: productId });
+
+    if (!prod)
+      throw new HttpException(
+        { error: 'Product is not found' },
+        HttpStatus.NOT_FOUND,
+      );
+
+    return await this.productRepository.update(
+      { id: productId },
+      {
+        title: product.title,
+        company: product.company,
+        address: product.address,
+        uom: product.uom,
+        description: product.description,
+        price: product.price,
+      },
+    );
+  }
+
+  async deleteProduct(productId: number) {
+    const product = await this.productRepository.findOne({ id: productId });
+    if (!product)
+      throw new HttpException(
+        { error: 'Product is not found' },
+        HttpStatus.NOT_FOUND,
+      );
+    return await this.productRepository.delete({ id: productId });
   }
 }
