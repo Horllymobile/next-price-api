@@ -8,11 +8,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { MailModule } from './mail/mail.module';
 import { ConfigModule } from '@nestjs/config';
+import { ProductsModule } from './products/products.module';
+import { ProductEntity } from './products/entity/product.entity';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
+    ProductsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -25,6 +28,7 @@ import { ConfigModule } from '@nestjs/config';
         //join(__dirname + '**/**/entity/*.js'),
         UserEntity,
         RoleEntity,
+        ProductEntity,
       ],
       synchronize: true,
       // migrationsRun: true,
