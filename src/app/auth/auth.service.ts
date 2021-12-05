@@ -129,7 +129,18 @@ export class AuthService {
       const save = await queryRunner.manager.save(newUser);
       if (save) {
         await queryRunner.commitTransaction();
-        return save;
+        return {
+          id: save.id,
+          image: save.image,
+          firstName: save.firstName,
+          lastName: save.lastName,
+          email: save.email,
+          isActive: save.isActive,
+          phoneNumber: save.phoneNumber,
+          role: save.roles,
+          createdAt: save.createdAt,
+          updatedAt: save.updatedAt,
+        };
       }
     } catch (error) {
       queryRunner.rollbackTransaction();
