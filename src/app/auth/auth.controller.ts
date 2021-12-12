@@ -17,7 +17,6 @@ import {
 import * as Joi from 'joi';
 import { UserDto } from '../user/dto/user.dto';
 import { Request, Response } from 'express';
-import { retry } from 'rxjs';
 
 const userSchema = Joi.object({
   firstName: Joi.string().required(),

@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -37,7 +38,7 @@ export class UserEntity {
   @CreateDateColumn({ type: 'datetime' })
   createdAt: Date;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'datetime' })
   updatedAt: Date;
 
   @Column({ nullable: true })
