@@ -1,34 +1,36 @@
 import { UserDto } from './dto/user.dto';
-import { ValidationPipe } from './../../core/shared/pipes/validation.pipe.pipe';
-import { Role } from './enums/Role';
+// import { ValidationPipe } from './../../core/shared/pipes/validation.pipe.pipe';
+// import { Role } from './enums/Role';
 import {
   Body,
   Delete,
-  HttpStatus,
+  // HttpStatus,
   ParseIntPipe,
   Post,
   Put,
   Req,
   SetMetadata,
-  UploadedFile,
+  // UploadedFile,
   UseGuards,
-  UseInterceptors,
-  UsePipes,
+  // UseInterceptors,
+  // UsePipes,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guard/jwt.auth.guard';
-import { Roles } from 'src/core/shared/decorator/role.decorator';
+// import { Roles } from 'src/core/shared/decorator/role.decorator';
 import { RolesGuard } from '../auth/guard/role.guard';
 import * as Joi from 'joi';
 import { UpdateValidationPipe } from 'src/core/shared/pipes/updatevalidation.pipe';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth } from '@nestjs/swagger';
+// import { FileInterceptor } from '@nestjs/platform-express';
 
 const userSchema = Joi.object({
   firstName: Joi.string().required(),
   lastName: Joi.string().required(),
   phoneNumber: Joi.string().required().min(11).max(14),
 });
+@ApiBearerAuth()
 @Controller('api/v1/users')
 @UseGuards(JwtAuthGuard)
 export class UserController {
