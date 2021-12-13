@@ -25,7 +25,7 @@ import { RolesGuard } from '../auth/guard/role.guard';
 import { ProductDTO } from './dto/product';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateProductDTO } from './dto/update_product_dto';
-import { Role } from '../user/enums/Role';
+import { Role } from 'src/core/models/enums/Role';
 
 const productSchema = Joi.object({
   title: Joi.string().required(),
