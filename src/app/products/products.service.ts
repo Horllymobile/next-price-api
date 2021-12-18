@@ -22,7 +22,6 @@ export class ProductsService implements IProduct {
     search?: string,
   ): Promise<any> {
     try {
-      const total = await this.productRepository.findAndCount();
       // this.connection.getRepository(ProductEntity)
       // .createQueryBuilder('product')
       // .where('')
@@ -44,7 +43,7 @@ export class ProductsService implements IProduct {
       const data: ProductPagination = {
         page: page ?? 0,
         size: size ?? 20,
-        total: total.length,
+        total: products.length,
         metaData: [...products],
       };
 
