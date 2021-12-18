@@ -31,6 +31,6 @@ async function bootstrap() {
     customSiteTitle: 'My API Docs',
   };
   SwaggerModule.setup('api', app, document, customOptions);
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 8080);
 }
 bootstrap();
