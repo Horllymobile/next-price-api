@@ -38,6 +38,7 @@ export class ProductsService implements IProduct {
         products = await this.productRepository.find({
           skip: page,
           take: size,
+          where: { approved: true}
         });
       }
       const data: ProductPagination = {

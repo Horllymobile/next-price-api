@@ -133,15 +133,15 @@ export class AuthService {
           roles: { permission: Permission.READONLY, role: Role.USER },
         });
       }
-      // const mailUser = {
-      //   email: user.email,
-      //   name: `${user.firstName} ${user.lastName}`,
-      // };
-      // const token = this.jwtService.sign(
-      //   { _id: user.email },
-      //   { expiresIn: '1 day' },
-      // );
-      // await this.mailService.sendUserConfirmation(mailUser, token);
+      const mailUser = {
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+      };
+      const token = this.jwtService.sign(
+        { _id: user.email },
+        { expiresIn: '1 day' },
+      );
+      await this.mailService.sendUserConfirmation(mailUser, token);
       const save = await queryRunner.manager.save(newUser);
       if (save) {
         await queryRunner.commitTransaction();

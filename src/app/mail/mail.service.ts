@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-
+import { ConfigService } from '@nestjs/config';
 interface User {
   email: string;
   name: string;
@@ -8,10 +8,15 @@ interface User {
 
 @Injectable()
 export class MailService {
-  constructor(private mailerService: MailerService) {}
+  constructor(
+    private mailerService: MailerService,
+    private configService: ConfigService,
+  ) {}
 
   async sendUserConfirmation(user: User, token: string) {
-    const url = `http://localhost:3000/api/auth/confirm?token=${token}`;
+    const url = `${this.configService.get(
+      'API_URL',
+    )}/api/auth/confirm?token=${token}`;
 
     await this.mailerService.sendMail({
       to: user.email,
