@@ -23,30 +23,33 @@ export class AuthService {
   ) {}
 
   async login(payload: LoginDto) {
-    const user = await this.userRepository.findOne({ email: payload.email });
+    let user = await this.userRepository.findOne({ email: payload.email });
     if (!user) {
-      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        'Invalid email or password',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
     const isValid = await bcrypt.compare(payload.password, user.password);
     if (!isValid)
       throw new HttpException(
-        'Password does not match',
+        'Invalid email or password',
         HttpStatus.UNAUTHORIZED,
       );
     if (!user.isActive)
       throw new HttpException(
-        'Email is not yet verified please check your mail to verify',
+        'Please verify your email address',
         HttpStatus.UNAUTHORIZED,
       );
-    if (!payload.remember) {
-      const accessToken = this.jwtService.sign({
-        _id: user.id,
-        username: user.email,
-        active: user.isActive,
-        roles: user.roles,
-      });
-      return { accessToken };
-    }
+    // if (!payload.remember) {
+    //   const accessToken = this.jwtService.sign({
+    //     _id: user.id,
+    //     username: user.email,
+    //     active: user.isActive,
+    //     roles: user.roles,
+    //   });
+    //   return { accessToken };
+    // }
     const accessToken = this.jwtService.sign(
       {
         _id: user.id,
@@ -54,13 +57,26 @@ export class AuthService {
         active: user.isActive,
         roles: user.roles,
       },
-      { expiresIn: '60' },
+      { expiresIn: '5d' },
     );
-    const refreshToken = this.jwtService.sign({
-      _id: user.id,
-      email: user.email,
-    });
-    return { accessToken, refreshToken };
+    user = await this.userRepository.findOne(
+      { email: payload.email },
+      {
+        select: [
+          'id',
+          'firstName',
+          'lastName',
+          'email',
+          'image',
+          'phoneNumber',
+          'createdAt',
+          'updatedAt',
+          'roles',
+        ],
+      },
+    );
+    // console.log(user);
+    return { success: true, metaData: { ...user, accessToken } };
   }
 
   // @Transaction({ isolation: 'SERIALIZABLE' })
@@ -123,7 +139,7 @@ export class AuthService {
       };
       const token = this.jwtService.sign(
         { _id: user.email },
-        { expiresIn: '10 day' },
+        { expiresIn: '1 day' },
       );
       await this.mailService.sendUserConfirmation(mailUser, token);
       const save = await queryRunner.manager.save(newUser);

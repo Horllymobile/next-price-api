@@ -25,7 +25,7 @@ import { RolesGuard } from '../auth/guard/role.guard';
 import { ProductDTO } from './dto/product';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateProductDTO } from './dto/update_product_dto';
-import { Role } from '../user/enums/Role';
+import { Role } from 'src/core/models/enums/Role';
 
 const productSchema = Joi.object({
   title: Joi.string().required(),
@@ -46,7 +46,7 @@ export class ProductsController {
   @UseGuards(RolesGuard)
   @SetMetadata('roles', [Role.SUPER_ADMIN, Role.ADMIN, Role.USER])
   async getProducts(
-    @Req() req,
+    @Req() request: Request,
     @Query(
       'page',
       // new ParseIntPipe({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
@@ -75,7 +75,6 @@ export class ProductsController {
     )
     search: string,
   ) {
-    // console.log(req.user);
     return await this.productService.getProducts(
       page ?? 0,
       size ?? 20,
@@ -116,7 +115,11 @@ export class ProductsController {
     this.productService
       .addProduct(product)
       .then((res: ProductEntity) => {
-        return response.status(HttpStatus.CREATED).json({ metaData: res });
+        return response.status(HttpStatus.CREATED).json({
+          success: true,
+          message: 'Product was successfully created',
+          metaData: res,
+        });
       })
       .catch((err) => {
         return response

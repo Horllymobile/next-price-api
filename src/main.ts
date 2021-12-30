@@ -8,6 +8,11 @@ import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: '*',
+  });
   const config = new DocumentBuilder()
     .addBearerAuth({
       type: 'apiKey',
@@ -26,6 +31,6 @@ async function bootstrap() {
     customSiteTitle: 'My API Docs',
   };
   SwaggerModule.setup('api', app, document, customOptions);
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 8080);
 }
 bootstrap();
