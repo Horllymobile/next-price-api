@@ -5,7 +5,6 @@ interface User {
   email: string;
   name: string;
 }
-
 @Injectable()
 export class MailService {
   constructor(private mailerService: MailerService) {}
@@ -15,7 +14,7 @@ export class MailService {
 
     await this.mailerService.sendMail({
       to: user.email,
-      subject: `Nexxt-Price Registeration Confirmation`,
+      subject: `Verify Account`,
       template: './confirmation',
       context: {
         name: user.name,
