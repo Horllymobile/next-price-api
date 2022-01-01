@@ -26,6 +26,7 @@ import { ProductDTO } from './dto/product';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateProductDTO } from './dto/update_product_dto';
 import { Role } from 'src/core/models/enums/Role';
+import { Permission } from 'src/core/models/enums/Permission';
 
 const productSchema = Joi.object({
   title: Joi.string().required(),
@@ -75,6 +76,16 @@ export class ProductsController {
     )
     search: string,
   ) {
+    const { roles, permission }: any = request.user;
+    if (roles === Role.SUPER_ADMIN && permission === Permission.WRITE_ALL) {
+      return await this.productService.adminGetProducts(
+        page ?? 0,
+        size ?? 20,
+        startDate,
+        endDate,
+        search,
+      );
+    }
     return await this.productService.getProducts(
       page ?? 0,
       size ?? 20,
@@ -170,6 +181,26 @@ export class ProductsController {
         response
           .status(HttpStatus.OK)
           .json({ message: 'Product successfully deleted' }),
+      )
+      .catch((err) => {
+        return response.status(HttpStatus.NOT_FOUND).send(err);
+      });
+  }
+
+  @Put('/:productId')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', [Role.SUPER_ADMIN])
+  async approveProduct(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Param('productId') productId: number,
+  ) {
+    this.productService
+      .approveProduct(productId)
+      .then((res) =>
+        response
+          .status(HttpStatus.OK)
+          .json({ message: 'Product successfully approved' }),
       )
       .catch((err) => {
         return response.status(HttpStatus.NOT_FOUND).send(err);

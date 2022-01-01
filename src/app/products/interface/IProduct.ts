@@ -13,4 +13,5 @@ export interface IProduct {
   addProduct(product: ProductDTO): Promise<any>;
   updateProduct(productId: number, metaData: UpdateProductDTO);
   deleteProduct(productId: number, reason?: string);
+  approveProduct(productId: number);
 }
