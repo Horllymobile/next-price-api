@@ -170,7 +170,7 @@ export class AuthService {
       throw new HttpException('Invalid token provided', HttpStatus.BAD_REQUEST);
     }
     const user = await this.userRepository.findOne({ email: isValid._id });
-    console.log(user);
+    // console.log(user);
     if (!user) {
       throw new HttpException('Account does not exist', HttpStatus.BAD_REQUEST);
     }
