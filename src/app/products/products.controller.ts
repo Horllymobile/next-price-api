@@ -187,7 +187,7 @@ export class ProductsController {
       });
   }
 
-  @Put('/:productId')
+  @Put('/approve/:productId')
   @UseGuards(RolesGuard)
   @SetMetadata('roles', [Role.SUPER_ADMIN])
   async approveProduct(
