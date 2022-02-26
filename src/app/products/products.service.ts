@@ -46,6 +46,49 @@ export class ProductsService implements IProduct {
       );
     }
   }
+
+  async adminGetProducts(
+    page: number,
+    size: number,
+    startDate?: Date,
+    endDate?: Date,
+    search?: string,
+  ): Promise<any> {
+    try {
+      // this.connection.getRepository(ProductEntity)
+      // .createQueryBuilder('product')
+      // .where('')
+      let products: ProductEntity[];
+      if (startDate && endDate) {
+        // console.log(dates);
+        products = await this.productRepository.query(
+          'SELECT * FROM product WHERE createAt BETWEEN :startDate and :endDate;',
+          [startDate, endDate],
+        );
+
+        // console.log(products);
+      } else {
+        products = await this.productRepository.find({
+          skip: page,
+          take: size,
+        });
+      }
+      const data: ProductPagination = {
+        page: page ?? 0,
+        size: size ?? 20,
+        total: products.length,
+        metaData: [...products],
+      };
+
+      return data;
+    } catch (error) {
+      throw new HttpException(
+        { error: error.message },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async getProduct(id: number): Promise<any> {
     try {
       const product = await this.productRepository.findOne(id);
@@ -136,5 +179,19 @@ export class ProductsService implements IProduct {
         HttpStatus.NOT_FOUND,
       );
     return await this.productRepository.delete({ id: productId });
+  }
+
+  async approveProduct(productId: number) {
+    const product = await this.productRepository.findOne({ id: productId });
+
+    if (!product) {
+      throw new HttpException(
+        { error: `product with id ${productId} does not exist` },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.productRepository.update(productId, { approved: true });
+
+    return { message: 'Product as been approved' };
   }
 }

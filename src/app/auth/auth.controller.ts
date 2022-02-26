@@ -13,6 +13,7 @@ import {
   Req,
   HttpStatus,
   Query,
+  Get,
 } from '@nestjs/common';
 import * as Joi from 'joi';
 import { UserDto } from '../user/dto/user.dto';
@@ -52,7 +53,7 @@ export class AuthController {
     return this.authService.login(payload);
   }
 
-  @Post('/confirm')
+  @Get('/confirm')
   async confirm(@Query('token') token: string) {
     return this.authService.confirm(token);
   }

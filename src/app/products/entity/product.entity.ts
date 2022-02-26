@@ -34,8 +34,8 @@ export class ProductEntity {
   @Column({ length: 256 })
   company: string;
 
-  // @Column({ unique: true, length: 256 })
-  // phoneNumber: string;
+  @Column({ default: false })
+  approved: boolean;
 
   @Column({ length: 512 })
   description: string;

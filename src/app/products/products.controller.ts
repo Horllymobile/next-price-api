@@ -29,6 +29,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateProductDTO } from './dto/update_product_dto';
 import { Role } from 'src/core/enums/Role';
 import { AddCommentDto } from './dto/create-comment';
+import { Permission } from 'src/core/enums/Permission';
 
 const productSchema = Joi.object({
   title: Joi.string().required(),
@@ -81,6 +82,16 @@ export class ProductsController {
     )
     search: string,
   ) {
+    const { roles, permission }: any = request.user;
+    if (roles === Role.SUPER_ADMIN && permission === Permission.WRITE_ALL) {
+      return await this.productService.adminGetProducts(
+        page ?? 0,
+        size ?? 20,
+        startDate,
+        endDate,
+        search,
+      );
+    }
     return await this.productService.getProducts(
       page ?? 0,
       size ?? 20,
