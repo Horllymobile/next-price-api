@@ -1,3 +1,4 @@
+import { ProductComment } from 'src/app/products/entity/comment.entity';
 import {
   Column,
   CreateDateColumn,
@@ -7,6 +8,7 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
 import { ImageEntity } from './image.entity';
 import { RoleEntity } from './role.entity';
@@ -35,10 +37,10 @@ export class UserEntity {
   @Column({ type: 'boolean', default: false })
   isActive: boolean;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ default: new Date() })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @Column({ nullable: true })
@@ -51,4 +53,7 @@ export class UserEntity {
   }) // entity relationships between user and role entity
   @JoinColumn()
   roles: RoleEntity;
+
+  @OneToMany((type) => ProductComment, (obj) => obj)
+  comments: Array<ProductComment>;
 }

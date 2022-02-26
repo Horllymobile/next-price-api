@@ -1,3 +1,4 @@
+import { UserRepository } from './../user/repository/user.repo';
 import { MailService } from './../mail/mail.service';
 import { UserService } from './../user/user.service';
 import { LoginDto } from './dto/LoginDto';
@@ -5,17 +6,17 @@ import { UserEntity } from './../user/entity/user.entity';
 import { RegisterDto } from './dto/RegisterDto';
 import { Injectable, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { Connection } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Permission } from '../../core/models/enums/Permission';
-import { Role } from '../../core/models/enums/Role';
+import { Permission } from '../../core/enums/Permission';
+import { Role } from '../../core/enums/Role';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    @InjectRepository(UserRepository)
+    private userRepository: UserRepository,
     private connection: Connection,
     private jwtService: JwtService,
     private userService: UserService,

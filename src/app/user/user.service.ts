@@ -12,12 +12,14 @@ import { Repository, Connection } from 'typeorm';
 import { UserDto, UpdateUserDto } from './dto/user.dto';
 import { UserEntity } from './entity/user.entity';
 import { IUserService } from './interface/iuser-service.interface';
+import { UserRepository } from './repository/user.repo';
 
 @Injectable()
 export class UserService implements IUserService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    @InjectRepository(UserRepository)
+    private userRepository: UserRepository,
+
     private connection: Connection,
   ) {}
 
@@ -51,9 +53,9 @@ export class UserService implements IUserService {
     return userPagination;
   }
 
-  async findUserById(userId: number): Promise<UserDto> {
+  async findUserById(id: number): Promise<UserDto> {
     try {
-      const user = await this.userRepository.findOne(userId, {
+      const user = await this.userRepository.findOne(id, {
         select: [
           'id',
           'firstName',
@@ -65,17 +67,14 @@ export class UserService implements IUserService {
           'roles',
         ],
       });
-      // if (!user)
-      //   throw new HttpException(
-      //     `user with id of ${userId} does not exist`,
-      //     HttpStatus.NOT_FOUND,
-      //   );
+      if (!user)
+        throw new HttpException(
+          `user with id of ${id} does not exist`,
+          HttpStatus.NOT_FOUND,
+        );
       return user;
     } catch (error) {
-      throw new HttpException(
-        'User not found',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
   async findByEmail(email: string) {

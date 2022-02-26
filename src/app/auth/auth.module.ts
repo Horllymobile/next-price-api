@@ -1,3 +1,5 @@
+import { RoleRepository } from './../user/repository/role.repo';
+import { UserRepository } from './../user/repository/user.repo';
 import { MailModule } from './../mail/mail.module';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { UserService } from './../user/user.service';
@@ -18,7 +20,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
         expiresIn: JwtContant.expiresIn,
       },
     }),
-    TypeOrmModule.forFeature([UserEntity, RoleEntity]),
+    TypeOrmModule.forFeature([UserRepository, RoleRepository]),
     MailModule,
   ],
   controllers: [AuthController],

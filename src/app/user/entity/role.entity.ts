@@ -1,7 +1,14 @@
 import { UserEntity } from './user.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Role } from '../../../core/models/enums/Role';
-import { Permission } from '../../../core/models/enums/Permission';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Role } from '../../../core/enums/Role';
+import { Permission } from '../../../core/enums/Permission';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity({ name: 'role' })
@@ -17,6 +24,12 @@ export class RoleEntity {
   @ApiProperty({ enum: ['WRITE', 'EDIT', 'READ'] })
   @Column({ default: Permission.READONLY })
   permission: Permission;
+
+  @CreateDateColumn({ default: new Date() })
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ApiProperty()
   @OneToOne(() => UserEntity, (user) => user.id, {

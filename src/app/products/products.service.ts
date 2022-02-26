@@ -1,3 +1,4 @@
+import { ProductRepository } from './product.repo';
 import { ProductEntity } from './entity/product.entity';
 import { Repository, Connection } from 'typeorm';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
@@ -6,11 +7,12 @@ import { IProduct } from './interface/IProduct';
 import { ProductPagination } from './interface/IProduct.response';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateProductDTO } from './dto/update_product_dto';
+import { GetProductResponse } from './res/get-products.response';
 @Injectable()
 export class ProductsService implements IProduct {
   constructor(
-    @InjectRepository(ProductEntity)
-    private productRepository: Repository<ProductEntity>,
+    @InjectRepository(ProductRepository)
+    private productRepository: ProductRepository,
     private connection: Connection,
   ) {}
 
@@ -20,33 +22,22 @@ export class ProductsService implements IProduct {
     startDate?: Date,
     endDate?: Date,
     search?: string,
-  ): Promise<any> {
+  ): Promise<GetProductResponse> {
     try {
-      // this.connection.getRepository(ProductEntity)
-      // .createQueryBuilder('product')
-      // .where('')
-      let products: ProductEntity[];
-      if (startDate && endDate) {
-        // console.log(dates);
-        products = await this.productRepository.query(
-          'SELECT * FROM product WHERE createAt BETWEEN :startDate and :endDate;',
-          [startDate, endDate],
-        );
+      const products = await this.productRepository.findProducts(
+        page,
+        size,
+        startDate,
+        endDate,
+        search,
+      );
 
-        // console.log(products);
-      } else {
-        products = await this.productRepository.find({
-          skip: page,
-          take: size,
-        });
-      }
-      const data: ProductPagination = {
+      const data: GetProductResponse = {
         page: page ?? 0,
         size: size ?? 20,
         total: products.length,
-        metaData: [...products],
+        data: products,
       };
-
       return data;
     } catch (error) {
       throw new HttpException(
@@ -131,7 +122,6 @@ export class ProductsService implements IProduct {
         title: product.title,
         company: product.company,
         address: product.address,
-        uom: product.uom,
         description: product.description,
         price: product.price,
       },

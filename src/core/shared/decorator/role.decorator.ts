@@ -1,6 +1,6 @@
 import { SetMetadata } from '@nestjs/common';
-import { Role } from 'src/core/models/enums/Role';
-import { Permission } from 'src/core/models/enums/Permission';
+import { Role } from 'src/core/enums/Role';
+import { Permission } from 'src/core/enums/Permission';
 
 interface RolePermision {
   role: Role;
