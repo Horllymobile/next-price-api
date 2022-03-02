@@ -7,7 +7,11 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
+
+import { ProductComment } from 'src/app/products/entity/comment.entity';
+import { UOM } from 'src/core/enums/unit-of-measurement';
 
 @Entity({ name: 'product' })
 // @Index()
@@ -25,7 +29,7 @@ export class ProductEntity {
   price: number;
 
   @Column({ length: 256, nullable: false })
-  uom: string;
+  uom: UOM;
 
   @Column({ length: 256 })
   company: string;
@@ -36,9 +40,13 @@ export class ProductEntity {
   @Column({ length: 512 })
   description: string;
 
-  @CreateDateColumn({ nullable: false })
+  @CreateDateColumn({ default: new Date() })
   createAt: Date;
 
-  @UpdateDateColumn({ nullable: false })
+  @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany((type) => ProductComment, (comment) => comment)
+  @JoinColumn()
+  comments: ProductComment[];
 }

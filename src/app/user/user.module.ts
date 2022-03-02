@@ -1,16 +1,18 @@
-import { ImageEntity } from './entity/image.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthMiddleware } from './../auth/middleware/auth.middleware';
-import { RoleEntity } from './entity/role.entity';
-import { UserEntity } from './entity/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { UserRepository } from './repository/user.repo';
+import { RoleRepository } from './repository/role.repo';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, RoleEntity]), AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([UserRepository, RoleRepository]),
+    AuthModule,
+  ],
   controllers: [UserController],
   providers: [UserService],
 })

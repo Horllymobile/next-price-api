@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UOM } from 'src/core/enums/unit-of-measurement';
 
 export class UpdateProductDTO {
   @ApiProperty()
@@ -12,9 +13,6 @@ export class UpdateProductDTO {
 
   @ApiProperty()
   price: number;
-
-  @ApiProperty()
-  uom: string;
 
   @ApiProperty()
   description: string;

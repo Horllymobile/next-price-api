@@ -1,3 +1,4 @@
+import { ProductRepository } from './product.repo';
 import { ProductEntity } from './entity/product.entity';
 import { Repository, Connection } from 'typeorm';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
@@ -6,15 +7,47 @@ import { IProduct } from './interface/IProduct';
 import { ProductPagination } from './interface/IProduct.response';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateProductDTO } from './dto/update_product_dto';
+import { GetProductResponse } from './res/get-products.response';
 @Injectable()
 export class ProductsService implements IProduct {
   constructor(
-    @InjectRepository(ProductEntity)
-    private productRepository: Repository<ProductEntity>,
+    @InjectRepository(ProductRepository)
+    private productRepository: ProductRepository,
     private connection: Connection,
   ) {}
 
   async getProducts(
+    page: number,
+    size: number,
+    startDate?: Date,
+    endDate?: Date,
+    search?: string,
+  ): Promise<GetProductResponse> {
+    try {
+      const products = await this.productRepository.findProducts(
+        page,
+        size,
+        startDate,
+        endDate,
+        search,
+      );
+
+      const data: GetProductResponse = {
+        page: page ?? 0,
+        size: size ?? 20,
+        total: products.length,
+        data: products,
+      };
+      return data;
+    } catch (error) {
+      throw new HttpException(
+        { error: error.message },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async adminGetProducts(
     page: number,
     size: number,
     startDate?: Date,
@@ -38,7 +71,6 @@ export class ProductsService implements IProduct {
         products = await this.productRepository.find({
           skip: page,
           take: size,
-          where: { approved: true}
         });
       }
       const data: ProductPagination = {
@@ -56,6 +88,7 @@ export class ProductsService implements IProduct {
       );
     }
   }
+
   async getProduct(id: number): Promise<any> {
     try {
       const product = await this.productRepository.findOne(id);
@@ -132,7 +165,6 @@ export class ProductsService implements IProduct {
         title: product.title,
         company: product.company,
         address: product.address,
-        uom: product.uom,
         description: product.description,
         price: product.price,
       },
@@ -147,5 +179,19 @@ export class ProductsService implements IProduct {
         HttpStatus.NOT_FOUND,
       );
     return await this.productRepository.delete({ id: productId });
+  }
+
+  async approveProduct(productId: number) {
+    const product = await this.productRepository.findOne({ id: productId });
+
+    if (!product) {
+      throw new HttpException(
+        { error: `product with id ${productId} does not exist` },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.productRepository.update(productId, { approved: true });
+
+    return { message: 'Product as been approved' };
   }
 }
